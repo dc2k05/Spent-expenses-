@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Spendwise</title><meta name="theme-color" content="#0b1512">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#0b1512;--cd:#122019;--ln:#1f3a2d;--tx:#e8f3ee;--mu:#86a596;--ac:#34d399;--rd:#f87171;--am:#fbbf24;color-scheme:dark}
+@media(prefers-color-scheme:light){:root{--bg:#f2f7f4;--cd:#fff;--ln:#d3e3da;--tx:#10231a;--mu:#5b7a6a;--ac:#059669;--rd:#dc2626;--am:#b45309;color-scheme:light}}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+main{max-width:560px;margin:auto;padding:12px 14px 110px}
+header{display:flex;align-items:center;gap:10px;padding:6px 0}
+header h1{font-size:24px;margin:0;flex:1;letter-spacing:-.3px}
+button,input,select{font:inherit;color:inherit}
+.ib{background:var(--cd);border:1px solid var(--ln);border-radius:50%;width:42px;height:42px;cursor:pointer;font-size:18px}
+nav{display:flex;gap:8px;margin:8px 0}
+nav button{flex:1;padding:10px 4px;border-radius:99px;border:1px solid var(--ln);background:var(--cd);cursor:pointer}
+nav .on{background:var(--tx);color:var(--bg);font-weight:600}
+.mn{display:flex;justify-content:space-between;align-items:center;margin:10px 0}
+.mn button{background:none;border:0;font-size:24px;padding:2px 16px;cursor:pointer}
+.c{background:var(--cd);border:1px solid var(--ln);border-radius:20px;padding:16px;margin:12px 0}
+.mu{color:var(--mu)}
+.big{font-size:30px;font-weight:700;font-family:ui-monospace,monospace;margin:4px 0}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}.g2 .c{margin:0}
+.cr{color:var(--ac)}.dr{color:var(--rd)}
+.bar{height:10px;border-radius:9px;background:var(--ln);overflow:hidden;margin:8px 0}.bar i{display:block;height:100%}
+.row{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--ln)}
+.row .g{flex:1;min-width:0}.row small{display:block}
+.ic{font-size:22px;width:36px;text-align:center}
+.x{background:none;border:0;color:var(--mu);font-size:20px;cursor:pointer}
+.tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;margin-left:6px;color:#111}
+.fab{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:50%;border:0;background:var(--ac);color:#04130c;font-size:32px;cursor:pointer;box-shadow:0 6px 20px #0006;z-index:2}
+.ov{position:fixed;inset:0;background:#000a;display:flex;align-items:flex-end;z-index:5}
+.sh{background:var(--cd);width:100%;max-width:560px;margin:auto;border-radius:24px 24px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:90vh;overflow:auto}
+.sh input,.sh select{width:100%;padding:12px;margin:6px 0;border-radius:12px;border:1px solid var(--ln);background:var(--bg)}
+.pb{width:100%;padding:13px;margin:6px 0;border-radius:12px;border:1px solid var(--ln);background:var(--bg);cursor:pointer;text-align:left}
+.pb.p{background:var(--ac);color:#04130c;font-weight:700;text-align:center;border:0}
+.sw{display:flex;gap:8px}.sw button{flex:1;padding:11px;border-radius:12px;border:1px solid var(--ln);background:var(--bg);cursor:pointer}
+.sw .on{background:var(--ac);color:#04130c;font-weight:700}
+#lock{position:fixed;inset:0;background:var(--bg);z-index:9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.dots{display:flex;gap:14px}.dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ac)}.dots .f{background:var(--ac)}
+.pad{display:grid;grid-template-columns:repeat(3,72px);gap:12px}.pad button{height:72px;border-radius:50%;border:1px solid var(--ln);background:var(--cd);font-size:24px;cursor:pointer}
+.ban{background:var(--cd);border:1px solid var(--am);border-radius:16px;padding:12px;margin:10px 0;display:flex;gap:10px;align-items:center}.ban span{flex:1}.ban .pb{width:auto;margin:0}
+.bs{width:84px;text-align:right;background:var(--bg);border:1px solid var(--ln);border-radius:10px;padding:6px}
+</style></head><body>
+<div id="lock" hidden></div>
+<main><header><h1>Spendwise</h1><button class="ib" id="gear" aria-label="Settings">⚙</button></header>
+<nav id="nav"></nav><div id="v"></div></main>
+<button class="fab" id="add" aria-label="Add entry">+</button>
+<div id="ov" class="ov" hidden><div class="sh" id="sh"></div></div>
+<script>
+const K='spendwise.v1',$=s=>document.querySelector(s),pad=n=>String(n).padStart(2,'0');
+const DEF=[['Rent','🏠'],['Groceries','🥦'],['Shopping','🛍️'],['Bills & Utilities','💡'],['Education','📚'],['Transport','🚕'],['Food & Dining','🍽️'],['Entertainment','🎬'],['Health','💊'],['Other','📦']];
+let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
+S=S||{cats:DEF.map(([n,e])=>({n,e})),tx:[],bud:{},fund:200000,pin:null,cred:null,bk:''};
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){alert('Could not save. Storage is full or blocked in this browser.')}};
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+const mk=d=>d.getFullYear()+'-'+pad(d.getMonth()+1);
+const fm=a=>'₹'+Number(a).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const sum=a=>a.reduce((x,t)=>x+t.a,0);
+const emo=n=>(S.cats.find(c=>c.n===n)||{e:n==='Income'?'💰':'📦'}).e;
+const COL=['#dc2626','#16a34a','#db2777','#0891b2','#6366f1','#eab308','#f97316','#a855f7','#14b8a6','#64748b'];
+let ip,M=new Date(),tab='d',ty='d',buf='',mode='unlock',tmp='',hid=0;M.setDate(1);
+const mtx=()=>S.tx.filter(t=>t.d.slice(0,7)===mk(M)).sort((a,b)=>b.d.localeCompare(a.d)||b.id-a.id);
+const st=p=>p>=100?['Over budget','var(--rd)']:p>=70?['Watch out','var(--am)']:['On track','var(--ac)'];
+const bar=(p,c)=>`<div class="bar"><i style="width:${Math.min(p,100)}%;background:${c}"></i></div>`;
+const fd=d=>new Date(d+'T00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+const row=t=>`<div class="row"><span class="ic">${emo(t.c)}</span><div class="g"><b>${esc(t.n||t.c)}</b><small class="mu">${esc(t.c)} · ${fd(t.d)}</small></div><b class="${t.t==='c'?'cr':'dr'}">${t.t==='c'?'+':'−'}${fm(t.a)}</b><button class="x" data-del="${t.id}" aria-label="Delete">×</button></div>`;
+function dash(){
+ const T=mtx(),cr=sum(T.filter(t=>t.t==='c')),D=T.filter(t=>t.t==='d'),dr=sum(D),by={};
+ D.forEach(t=>by[t.c]=(by[t.c]||0)+t.a);
+ const E=Object.entries(by).sort((a,b)=>b[1]-a[1]),tb=Object.values(S.bud).reduce((a,b)=>a+b,0),
+ us=Object.keys(S.bud).reduce((a,k)=>a+(by[k]||0),0),bp=tb?Math.round(us/tb*100):0,[bl,bc]=st(bp);
+ const net=sum(S.tx.filter(t=>t.t==='c'))-sum(S.tx.filter(t=>t.t==='d')),fp=Math.max(0,Math.min(100,Math.round(net/S.fund*100)));
+ let off=0;const R=70,L=2*Math.PI*R;
+ const arcs=E.map(([k,v],i)=>{const l=v/dr*L,s=`<circle cx="90" cy="90" r="${R}" fill="none" stroke="${COL[i%10]}" stroke-width="26" stroke-dasharray="${l} ${L-l}" stroke-dashoffset="${-off}" transform="rotate(-90 90 90)"/>`;off+=l;return s}).join('');
+ return (S.pin?'':`<div class="ban"><span>Set a PIN to protect your data.</span><button class="pb p" data-a="pin">Set PIN</button></div>`)+
+ (S.tx.length&&S.bk!==mk(new Date())?`<div class="ban"><span>This month’s backup is due.</span><button class="pb p" data-a="bk">Back up</button></div>`:'')+
+ `<div class="g2"><div class="c"><span class="mu">Credits in</span><div class="big cr" style="font-size:18px">${fm(cr)}</div></div><div class="c"><span class="mu">Debits out</span><div class="big dr" style="font-size:18px">${fm(dr)}</div></div></div>
+ <div class="c"><span class="mu">Budget used</span><div class="big" style="color:${bc}">${tb?bp+'%':'–'}</div>${tb?bar(bp,bc)+`<span class="mu">${fm(us)} of ${fm(tb)} · ${bl}</span>`:'<span class="mu">Set limits in the Budgets tab.</span>'}</div>
+ <div class="c"><b>Where the money went</b>${dr?`<svg viewBox="0 0 180 180" style="width:200px;display:block;margin:10px auto">${arcs}</svg>`+E.map(([k,v],i)=>`<div class="row"><span style="width:10px;height:10px;border-radius:50%;background:${COL[i%10]}"></span><span class="g">${emo(k)} ${esc(k)}</span><b>${fm(v)}</b><span class="mu" style="width:46px;text-align:right">${(v/dr*100).toFixed(1)}%</span></div>`).join(''):'<p class="mu">No debits yet this month.</p>'}</div>
+ <div class="c"><b>Emergency fund</b><div class="big">${fp}%</div>${bar(fp,'var(--ac)')}<span class="mu">${fm(Math.max(net,0))} of ${fm(S.fund)}. Fills as your net balance grows.</span><button class="pb" data-a="fund" style="margin-top:10px">Change target</button></div>
+ <div class="c"><b>Recent activity</b>${T.slice(0,5).map(row).join('')||'<p class="mu">Tap + to add your first entry.</p>'}</div>
+ <div class="c"><span class="mu">Net balance</span><div class="big">${fm(cr-dr)}</div><span class="mu">${T.length} transactions this month</span></div>`}
+const txs=()=>`<div class="c">${mtx().map(row).join('')||'<p class="mu">No transactions this month.</p>'}</div>`;
+function buds(){const by={};mtx().filter(t=>t.t==='d').forEach(t=>by[t.c]=(by[t.c]||0)+t.a);
+ return `<div class="c">${S.cats.map(c=>{const b=S.bud[c.n]||0,s=by[c.n]||0,p=b?Math.round(s/b*100):0,[l,k]=st(p);
+ return `<div class="row" style="flex-wrap:wrap"><span class="ic">${c.e}</span><div class="g"><b>${esc(c.n)}</b>${b?`<span class="tag" style="background:${k}">${l}</span>`:''}<small class="mu">${fm(s)} spent${b?' · '+fm(Math.max(b-s,0))+' left':''}</small></div><input class="bs" type="number" inputmode="decimal" min="0" placeholder="Limit" value="${b||''}" data-bud="${esc(c.n)}"><button class="x" data-dc="${esc(c.n)}" aria-label="Remove category">×</button>${b?`<div style="width:100%">${bar(p,k)}</div>`:''}</div>`}).join('')}<button class="pb" data-a="cat" style="margin-top:10px">Add category</button></div>`}
+function render(){
+ $('#nav').innerHTML=[['d','Dashboard'],['t','Transactions'],['b','Budgets']].map(([k,n])=>`<button class="${k===tab?'on':''}" data-tab="${k}">${n}</button>`).join('');
+ $('#v').innerHTML=`<div class="mn"><button data-m="-1" aria-label="Previous month">‹</button><b>${M.toLocaleDateString('en-IN',{month:'long',year:'numeric'})}</b><button data-m="1" aria-label="Next month">›</button></div>`+(tab==='d'?dash():tab==='t'?txs():buds())}
+const sheet=h=>{$('#sh').innerHTML=h;$('#ov').hidden=false},close=()=>{$('#ov').hidden=true};
+function addSheet(){ty='d';sheet(`<h3 style="margin:0 0 8px">New entry</h3><div class="sw"><button class="on" data-ty="d">Debit</button><button data-ty="c">Credit</button></div><input id="fa" type="number" inputmode="decimal" placeholder="Amount in ₹" min="0"><select id="fc">${S.cats.map(c=>`<option>${esc(c.n)}</option>`).join('')}</select><input id="fn" placeholder="Note, for example Fuel"><input id="fdt" type="date" value="${today()}"><button class="pb p" data-a="saveTx">Save entry</button><button class="pb" data-a="close">Cancel</button>`)}
+function saveTx(){const a=parseFloat($('#fa').value);if(!(a>0))return $('#fa').focus();
+ const d=$('#fdt').value||today();S.tx.push({id:Date.now(),t:ty,a:Math.round(a*100)/100,c:ty==='c'?'Income':$('#fc').value,n:$('#fn').value.trim(),d});save();M=new Date(d+'T00:00');M.setDate(1);close();render()}
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();ip=e});
+function setSheet(){sheet(`<h3 style="margin:0 0 8px">Settings</h3><p class="mu" style="margin:0 0 8px">${navigator.serviceWorker&&navigator.serviceWorker.controller?'Works offline on this device.':'Open once with internet so it can save itself for offline use.'}</p>${ip?'<button class="pb p" data-a="inst">Add to home screen</button>':''}<button class="pb" data-a="pin">${S.pin?'Change':'Set'} PIN</button><button class="pb" data-a="bio">${S.cred?'Re-enrol':'Enable'} fingerprint unlock</button>${S.pin?'<button class="pb" data-a="nopin">Remove PIN and fingerprint</button>':''}<button class="pb" data-a="csv">Export CSV</button><button class="pb" data-a="bk">Back up (JSON)</button><label class="pb" style="display:block">Restore a backup<input type="file" accept=".json" id="rf" hidden></label><button class="pb" data-a="reset" style="color:var(--rd)">Erase all data</button><button class="pb p" data-a="close">Done</button>`)}
+const dl=(n,s,m)=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:m}));a.download=n;a.click()};
+function csv(){const r=[['Date','Type','Category','Note','Amount']].concat(S.tx.slice().sort((a,b)=>a.d.localeCompare(b.d)).map(t=>[t.d,t.t==='c'?'Credit':'Debit',t.c,t.n,t.a]));
+ dl('spendwise-'+today()+'.csv',r.map(x=>x.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv')}
+async function backup(){const{pin,cred,...d}=S,n='spendwise-backup-'+today()+'.json',j=JSON.stringify(d),f=new File([j],n,{type:'application/json'});
+ if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f]})}catch(e){return}}else dl(n,j,'application/json');
+ S.bk=mk(new Date());save();render()}
+async function restore(f){try{const d=JSON.parse(await f.text());if(!Array.isArray(d.tx)||!Array.isArray(d.cats))throw 0;if(!confirm('Replace the data on this device with this backup?'))return;const{pin,cred}=S;S={...d,pin,cred};save();close();render()}catch(e){alert('This file is not a Spendwise backup.')}}
+async function H(p){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('sw|'+p));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+const MSG=()=>({unlock:'Enter PIN',new:'Choose a 4-digit PIN',confirm:'Confirm your PIN'})[mode];
+function lockUI(m){const L=$('#lock');L.hidden=false;L.innerHTML=`<div style="font-size:40px">🔒</div><b>${m}</b><div class="dots">${[0,1,2,3].map(i=>`<i class="${i<buf.length?'f':''}"></i>`).join('')}</div><div class="pad">${[1,2,3,4,5,6,7,8,9,'✕',0,'⌫'].map(k=>`<button data-k="${k}">${k}</button>`).join('')}</div>${mode==='unlock'&&S.cred?'<button class="pb" style="width:auto" data-a="unbio">Use fingerprint</button>':''}`}
+async function key(k){
+ if(k==='⌫')buf=buf.slice(0,-1);else if(k==='✕'){if(!buf&&mode!=='unlock'){mode='unlock';$('#lock').hidden=true;return}buf=''}else if(buf.length<4)buf+=k;
+ if(buf.length<4)return lockUI(MSG());
+ const p=buf;buf='';
+ if(mode==='unlock'){if(await H(p)===S.pin)$('#lock').hidden=true;else lockUI('Wrong PIN. Try again.')}
+ else if(mode==='new'){tmp=p;mode='confirm';lockUI(MSG())}
+ else if(p===tmp){S.pin=await H(p);save();mode='unlock';$('#lock').hidden=true;render()}
+ else{mode='new';lockUI('PINs did not match. Start again.')}}
+const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b))),ub=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function enrol(){if(!S.pin)return alert('Set a PIN first.');
+ try{const c=await navigator.credentials.create({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rp:{name:'Spendwise'},user:{id:crypto.getRandomValues(new Uint8Array(16)),name:'owner',displayName:'Owner'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'}}});S.cred=b64(c.rawId);save();alert('Fingerprint unlock is on.');setSheet()}
+ catch(e){alert('Could not turn on fingerprint. Check that a fingerprint is set up on this device and the app is opened over https.')}}
+async function unbio(){try{await navigator.credentials.get({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),allowCredentials:[{type:'public-key',id:ub(S.cred)}],userVerification:'required'}});$('#lock').hidden=true}catch(e){}}
+const relock=()=>{mode='unlock';buf='';lockUI('Enter PIN');if(S.cred)unbio()};
+document.addEventListener('click',e=>{
+ const t=e.target.closest('[data-a],[data-tab],[data-m],[data-del],[data-dc],[data-ty],[data-k]');if(!t)return;const D=t.dataset;
+ if(D.k!==undefined)return key(D.k);
+ if(D.tab){tab=D.tab;return render()}
+ if(D.m){M.setMonth(M.getMonth()+ +D.m);return render()}
+ if(D.del){if(confirm('Delete this entry?')){S.tx=S.tx.filter(x=>String(x.id)!==D.del);save();render()}return}
+ if(D.dc){if(confirm('Remove the category '+D.dc+'? Past entries stay.')){S.cats=S.cats.filter(c=>c.n!==D.dc);delete S.bud[D.dc];save();render()}return}
+ if(D.ty){ty=D.ty;document.querySelectorAll('[data-ty]').forEach(b=>b.classList.toggle('on',b===t));$('#fc').hidden=ty==='c';return}
+ ({close,saveTx,csv,unbio,bk:backup,bio:enrol,
+  inst(){ip.prompt();ip=null;close()},
+  pin(){close();mode='new';buf='';lockUI(MSG())},
+  nopin(){if(confirm('Remove the PIN and fingerprint unlock?')){S.pin=S.cred=null;save();close();render()}},
+  fund(){const v=parseFloat(prompt('Emergency fund target in ₹',S.fund));if(v>0){S.fund=v;save();render()}},
+  cat(){const n=(prompt('Category name')||'').trim();if(!n||S.cats.some(c=>c.n===n))return;S.cats.push({n,e:(prompt('Emoji','🏷️')||'🏷️').trim().slice(0,4)});save();render()},
+  reset(){if(confirm('Erase ALL data on this device? Back up first.')&&confirm('Really erase everything?')){S.tx=[];S.bud={};S.cats=DEF.map(([n,e])=>({n,e}));save();close();render()}}
+ })[D.a]?.()});
+document.addEventListener('change',e=>{const el=e.target;
+ if(el.dataset.bud!==undefined){const v=parseFloat(el.value);if(v>0)S.bud[el.dataset.bud]=v;else delete S.bud[el.dataset.bud];save();render()}
+ if(el.id==='rf'&&el.files[0])restore(el.files[0])});
+$('#add').onclick=addSheet;$('#gear').onclick=setSheet;
+$('#ov').addEventListener('click',e=>{if(e.target.id==='ov')close()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)hid=Date.now();else if(S.pin&&hid&&Date.now()-hid>60000)relock()});
+if(S.pin)relock();
+render();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script></body></html>
